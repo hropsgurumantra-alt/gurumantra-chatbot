@@ -1,61 +1,75 @@
 import streamlit as st
-from google import genai
+import pandas as pd
+import os
 
-st.set_page_config(page_title="GuruMantra Career Assistant", page_icon="🎯")
+st.set_page_config(page_title="GuruMantra IT Career Assistant")
 
-# Show Logo
-st.image("logo.png", width=200)
+st.title("🎯 GuruMantra IT Career Assistant")
+st.write("Hi 👋 I help students choose the right IT career path.")
 
-st.title("🎯 GuruMantra Career Assistant")
-st.caption("Your Personal Career Growth Partner 🚀")
+if "step" not in st.session_state:
+    st.session_state.step = 1
 
-# Get API key
-api_key = st.secrets.get("GOOGLE_API_KEY")
+# STEP 1 – Start
+if st.session_state.step == 1:
+    if st.button("Start Career Guidance"):
+        st.session_state.step = 2
 
-if not api_key:
-    st.error("API key not found. Please add it in Streamlit Secrets.")
-    st.stop()
+# STEP 2 – Education
+if st.session_state.step == 2:
+    education = st.selectbox("What is your education?",
+                             ["BSc", "BCom", "BE/BTech", "Arts", "Diploma", "Other"])
+    if st.button("Next"):
+        st.session_state.education = education
+        st.session_state.step = 3
 
-client = genai.Client(api_key=api_key)
+# STEP 3 – Interest
+if st.session_state.step == 3:
+    coding = st.radio("Do you like coding?",
+                      ["Yes", "No", "Not Sure"])
+    if st.button("See Career Suggestion"):
+        st.session_state.coding = coding
+        st.session_state.step = 4
 
-# Career system instruction
-system_prompt = """
-You are GuruMantra Career Assistant.
-You help users with:
-- Career guidance
-- Interview preparation
-- Resume building
-- Communication skills
-- Government exam preparation
-- IT Support & Technical careers
+# STEP 4 – Career Suggestion
+if st.session_state.step == 4:
 
-Keep answers clear, motivating, and practical.
-"""
+    if st.session_state.coding == "No":
+        st.success("""
+        🎯 Recommended Careers:
+        ✔ Software Testing
+        ✔ IT Support
+        ✔ Salesforce Admin
+        ✔ Business Analyst
+        """)
+    else:
+        st.success("""
+        🎯 Recommended Careers:
+        ✔ Python Developer
+        ✔ Frontend Developer
+        ✔ Data Analyst
+        ✔ Full Stack Developer
+        """)
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.write("📩 Enter your details to receive FREE Career Roadmap + Demo Class")
 
-# Display previous messages
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+    name = st.text_input("Your Name")
+    phone = st.text_input("Phone Number")
+    email = st.text_input("Email")
 
-if prompt := st.chat_input("Ask about career, exams, interviews..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    if st.button("Submit"):
 
-    with st.chat_message("user"):
-        st.write(prompt)
+        new_data = pd.DataFrame({
+            "Name": [name],
+            "Phone": [phone],
+            "Email": [email],
+            "Education": [st.session_state.education],
+            "Coding Interest": [st.session_state.coding]
+        })
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=system_prompt + "\nUser: " + prompt,
-        )
-        reply = response.text
-    except Exception as e:
-        reply = f"Error: {str(e)}"
+        if os.path.exists("leads.csv"):
+            new_data.to_csv("leads.csv", mode='a', header=False, index=False)
+        else:
+            new_data.to_csv("leads.csv", index=False)
 
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-
-    with st.chat_message("assistant"):
-        st.write(reply)
+        st.success("✅ Thank you! Our team will contact you soon 🚀")
