@@ -5,7 +5,7 @@ st.title("🤖 GuruMantra4U Chatbot")
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
+model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -26,3 +26,4 @@ if prompt := st.chat_input("Type your message..."):
     with st.chat_message("assistant"):
 
         st.write(reply)
+
