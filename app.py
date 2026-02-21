@@ -18,7 +18,7 @@ if prompt := st.chat_input("Type your message..."):
         st.write(prompt)
 
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-1.5-flash-latest",
         contents=prompt,
     )
 
@@ -27,3 +27,4 @@ if prompt := st.chat_input("Type your message..."):
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
         st.write(reply)
+
