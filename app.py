@@ -1,11 +1,9 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 st.title("🤖 GuruMantra4U Chatbot")
 
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-
-model = genai.GenerativeModel("models/gemini-1.5-flash")
+client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -19,11 +17,13 @@ if prompt := st.chat_input("Type your message..."):
     with st.chat_message("user"):
         st.write(prompt)
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-1.5-flash",
+        contents=prompt,
+    )
+
     reply = response.text
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
-
         st.write(reply)
-
